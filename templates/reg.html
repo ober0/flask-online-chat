@@ -1,50 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Регистрация</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <div class="container">
-        <span id="head-h1"></span>
-        <form action="/auth" method="post" class="auth" id="auth-form" emails="{{ emails }}" >
-            <div class="form-group">
-                <label for="name">Имя</label>
-                <input type="text" name="name" id="name">
-                <span class="error-message" id="name-error"></span>
-            </div>
+{% block head %}
+<title>Регистрация</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
 
 
-            <div class="form-group">
-                <label for="email">Электронная почта</label>
-                <input type="text" name="email" id="email">
-                <span class="error-message" id="email-error"></span>
-            </div>
+{% block body %}
+<div class="container">
+    <span id="head-h1"></span>
+    <form action="/auth" method="post" class="auth" id="auth-form" emails="{{ emails }}" >
+        <div class="form-group">
+            <label for="name">Имя</label>
+            <input type="text" name="name" id="name">
+            <span class="error-message" id="name-error"></span>
+        </div>
 
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" name="password" id="password">
-                <img draggable="false"
-                     src="{{ url_for('static', filename='img/iconHidden.png') }}"
-                     data-open="{{ url_for('static', filename='img/iconOpen.png') }}"
-                     data-hidden="{{ url_for('static', filename='img/iconHidden.png') }}"
-                     alt="Посмотреть пароль"
-                     id="iconPassword">
-                <span class="error-message" id="password-error"></span>
-            </div>
+        <div class="form-group">
+            <label for="email">Электронная почта</label>
+            <input type="text" name="email" id="email">
+            <span class="error-message" id="email-error"></span>
+        </div>
 
-            <input id="form-main-button" type="button" value="Регистрация">
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" name="password" id="password">
+            <img draggable="false"
+                 src="{{ url_for('static', filename='img/iconHidden.png') }}"
+                 data-open="{{ url_for('static', filename='img/iconOpen.png') }}"
+                 data-hidden="{{ url_for('static', filename='img/iconHidden.png') }}"
+                 alt="Посмотреть пароль"
+                 id="iconPassword">
+            <span class="error-message" id="password-error"></span>
+        </div>
 
-        </form>
+        <input id="form-main-button" type="button" value="Регистрация">
+    </form>
+    <br>
+    <a href="/" class="register-link">Войти</a>
+</div>
 
-        <br>
-
-        <a href="/" class="register-link">Войти</a>
-    </div>
-
-
-    <script src="{{ url_for('static', filename='js/reg.js') }}"></script>
-</body>
-</html>
+<script src="{{ url_for('static', filename='js/reg.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,56 @@
+body, html {
+    height: 95%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f5;
+}
+.chat-container {
+
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: 90%;
+    overflow-y: auto;
+    text-align: left;
+}
+.message {
+    background-color: #f0f0f5;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    width: max-content;
+    max-width: 400px;
+}
+.message.sender {
+    background-color: #007bff;
+    color: #fff;
+    align-self: flex-end;
+
+}
+.message-box {
+    display: block;
+
+}
+.message-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    font-size: 16px;
+    outline: none;
+    margin-right: -4px; /* Убираем небольшой отступ между строкой ввода и кнопкой */
+}
+.send-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+}

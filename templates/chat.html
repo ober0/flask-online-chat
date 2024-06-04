@@ -1,102 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат с {{user.name}}</title>
-    <style>
-        body, html {
+{% extends 'base.html' %}
 
-            height: 95%;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f5;
-        }
-        .chat-container {
-
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            height: 90%;
-            overflow-y: auto;
-            text-align: left;
-        }
-        .message {
-            background-color: #f0f0f5;
-            border-radius: 10px;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            width: max-content;
-            max-width: 400px;
-        }
-        .message.sender {
-            background-color: #007bff;
-            color: #fff;
-            align-self: flex-end;
-
-        }
-        .message-box {
-            display: block;
-
-        }
-        .message-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px 0 0 5px;
-            font-size: 16px;
-            outline: none;
-            margin-right: -4px; /* Убираем небольшой отступ между строкой ввода и кнопкой */
-        }
-        .send-button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 0 5px 5px 0;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            outline: none;
-        }
-    </style>
-</head>
-<body>
+{% block head %}
+<title>Чат с {{user.name}}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+{% endblock %}
 
 
-    <h2 style="position: absolute; top: 0%">{{ user.name }}</h2>
-    <div style="width: 510px; margin-top: 70px" class="chat-container" id="chat-container">
-
-
-        <div id="messages">
-            {% for message in messages %}
-                {% if message.chat_id == user.id %}
-                    <div class="message sender">{{ message.message }}</div>
-                {% else %}
-                    <div class="message">{{ message.message }}</div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-
-
-        <div style="width: 490px; text-align: center" class="message-box">
-            <input style="width: 390px" type="text" class="message-input" id="message-input" placeholder="Type your message...">
-            <button id="send" class="send-button" ForUserId="{{user.id}}">Send</button>
-        </div>
+{% block body %}
+<h2 style="position: absolute; top: 0%">{{ user.name }}</h2>
+<div style="width: 510px; margin-top: 70px" class="chat-container" id="chat-container">
+    <div id="messages">
+        {% for message in messages %}
+            {% if message.chat_id == user.id %}
+                <div class="message sender">{{ message.message }}</div>
+            {% else %}
+                <div class="message">{{ message.message }}</div>
+            {% endif %}
+        {% endfor %}
     </div>
-    <script>
-        window.onload = function() {
-            var chatContainer = document.getElementById("chat-container");
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        };
-    </script>
 
-    <script src="{{ url_for('static', filename='js/message.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/checkMessage.js') }}"></script>
+    <div style="width: 490px; text-align: center" class="message-box">
+        <input style="width: 390px" type="text" class="message-input" id="message-input" placeholder="Type your message...">
+        <button id="send" class="send-button" ForUserId="{{user.id}}">Send</button>
+    </div>
+</div>
+<script>
+    window.onload = function() {
+        var chatContainer = document.getElementById("chat-container");
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+</script>
 
-</body>
-</html>
+<script src="{{ url_for('static', filename='js/message.js') }}"></script>
+<script src="{{ url_for('static', filename='js/checkMessage.js') }}"></script>
+{% endblock %}
+

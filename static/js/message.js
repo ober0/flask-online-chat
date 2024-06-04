@@ -8,7 +8,7 @@ document.getElementById('send').addEventListener('click', function () {
         message_to: this.getAttribute('ForUserId'),
         text_message: messageText
     }
-    console.log('sent')
+
     fetch('/sendMsg', {
         method: 'post',
         headers: {

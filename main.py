@@ -1,9 +1,10 @@
-import json
 import random
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, json
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 import secrets
+from sqlalchemy import or_, and_
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -30,12 +31,138 @@ class User(db.Model):
     status = db.Column(db.Integer, default=0)
 
 
+class Chats(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    chat_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(1000), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    chat_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    new = db.Column(db.String(10), default='True')
+
+@app.route('/checkMsg', methods=['POST'])
+def checkMsg():
+    if request.method == "POST":
+        id2 = request.json.get('from_id')
+        id1 = session['account']
+
+
+
+        messages = Message.query.filter(
+            or_(
+                and_(Message.chat_id == id2, Message.user_id == id1),
+                and_(Message.chat_id == id1, Message.user_id == id2)
+            )
+        ).order_by(Message.id).all()
+
+        for msg in messages:
+            if msg.new == 'True':
+                if msg.user_id != session['account']:
+                    msg.new = 'False'
+                    db.session.commit()
+                    return jsonify({
+                        'success': True,
+                        'message': msg.message
+                    })
+        return jsonify({
+            'success': False
+        })
+
+@app.route("/sendMsg", methods=['POST'])
+def send_msg():
+    if request.method == "POST":
+        message_to = request.json.get('message_to')
+        message = request.json.get('text_message')
+        fromUseerId = session['account']
+
+        message = Message(message=message, user_id=fromUseerId, chat_id=message_to)
+
+        try:
+            db.session.add(message)
+            db.session.commit()
+            return jsonify({'success': True})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False})
+    return jsonify({'success': False})
+@app.route('/user/<int:user_id>', methods=['GET', 'POST'])
+def user(user_id):
+
+    if 'auth' in session and session['auth'] == True:
+
+        if request.method == 'GET':
+            user = User.query.filter_by(id=user_id).first()
+            if user_id in [contact.chat_id for contact in Chats.query.filter_by(user_id=session['account']).all()]:
+                added = True
+            else:
+                added = False
+            return render_template('user.html', user=user, added=added)
+        if request.method == 'POST':
+            command = request.json['command']
+            idToAdd = request.json['user_id']
+            selfId = session['account']
+            if command == 'add_user':
+                if int(idToAdd) in [int(contact.chat_id) for contact in Chats.query.all()]:
+                    return jsonify({
+                        'result': False,
+                        'message': 'Пользователь уже добавлен'
+                    })
+                chats = Chats(user_id=selfId, chat_id=idToAdd)
+                try:
+                    db.session.add(chats)
+                    db.session.commit()
+                    return jsonify({
+                        'result': True,
+                        'message': 'Успешно!'
+                    })
+                except Exception as e:
+                    db.session.rollback()
+                    return jsonify({
+                        'result': False,
+                        'message': str(e)
+                    })
+
+            elif command == 'remove_user':
+                if int(idToAdd) in [int(contact.chat_id) for contact in Chats.query.all()]:
+                    chatToRemove = Chats.query.filter_by(chat_id=idToAdd).filter_by(user_id=selfId).first()
+                    try:
+                        db.session.delete(chatToRemove)
+                        db.session.commit()
+                        return jsonify({
+                            'result': True,
+                            'message': 'Успешно!'
+                        })
+                    except:
+                        db.session.rollback()
+                        return jsonify({
+                            'result': False,
+                            'message': str(e)
+                        })
+                else:
+                    return jsonify({
+                        'result': False,
+                        'message': 'Ошибка. Пользователь не в списке контактов!'
+                    })
+            else:
+                return redirect('/')
+    else:
+        return redirect('/')
 @app.route('/')
 def index():
-    if 'auth' in session:
-        if session['auth']:
-            return render_template('index.html', username=User.query.filter_by(id=session['account']).first().name)
+    if 'auth' in session and session['auth']:
+        contacts_list = [i.chat_id for i in Chats.query.filter_by(user_id=session['account']).all()]
+        contacts = []
+        for i in contacts_list:
+            contacts.append([i, User.query.filter_by(id=i).first().name])
+
+        return render_template('index.html',
+                               username=User.query.filter_by(id=session['account']).first().name,
+                               contacts=contacts
+                               )
 
     session['auth_data'] = ''
     session['auth_code'] = ''
@@ -135,6 +262,21 @@ def confirm_email():
 def exit():
     session['auth'] = False
     session['account'] = ''
+    return redirect('/')
+
+@app.route("/chat/<int:chat_id>")
+def chat(chat_id):
+    if 'auth' in session and session['auth']:
+        messages = Message.query.filter(
+            or_(
+                and_(Message.chat_id == chat_id, Message.user_id == session['account']),
+                and_(Message.chat_id == session['account'], Message.user_id == chat_id)
+            )
+        ).order_by(Message.id).all()
+        chat = Chats.query.filter_by(user_id=session['account']).filter_by(chat_id=chat_id).all()
+        if len(chat) == 0:
+            return redirect('/')
+        return render_template('chat.html', user=User.query.filter_by(id=chat_id).first(), messages=messages)
     return redirect('/')
 
 if __name__ == '__main__':

@@ -7,8 +7,14 @@
 
 
 {% block body %}
+
 <h2 style="position: absolute; top: 0%">{{ user.name }}</h2>
 <div style="width: 510px; margin-top: 70px" class="chat-container" id="chat-container">
+    <div style="text-align: right; width: 380px">
+        <input user_id="{{user.id}}" type="button" id="clear" style="position: fixed; margin-top: 45px; margin-left: -3px" class="button-clear" value="Очистить чат">
+        <input type="button" id="goMenu" style="position: fixed" class="button-exit" value="В меню">
+        <input type="button" id="goBottom" style="position: fixed; margin-top: 90px; margin-left: 1px;" class="button-goBottom" value="Вниз">
+    </div>
     <div id="messages">
         {% for message in messages %}
             {% if message.chat_id == user.id %}
@@ -19,9 +25,9 @@
         {% endfor %}
     </div>
 
-    <div style="width: 490px; text-align: center" class="message-box">
+    <div style="width: 490px; text-align: center; position: fixed; top: 88%;" class="message-box">
         <input style="width: 390px" type="text" class="message-input" id="message-input" placeholder="Type your message...">
-        <button id="send" class="send-button" ForUserId="{{user.id}}">Send</button>
+        <button id="send"  class="send-button" ForUserId="{{user.id}}">Send</button>
     </div>
 </div>
 <script>
@@ -33,5 +39,6 @@
 
 <script src="{{ url_for('static', filename='js/message.js') }}"></script>
 <script src="{{ url_for('static', filename='js/checkMessage.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chatButtons.js') }}"></script>
 {% endblock %}
 

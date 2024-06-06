@@ -44,6 +44,22 @@ class Message(db.Model):
     chat_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     new = db.Column(db.String(10), default='True')
 
+
+@app.route('/clear', methods=['POST'])
+def clear():
+    if request.method == 'POST':
+        self_id = session.get('account')
+        chat_id = request.json.get('chat')
+
+        for i in Message.query.all():
+            print(i.user_id, i.chat_id, self_id,chat_id)
+            if (int(i.user_id) == int(self_id) and int(i.chat_id) == int(chat_id)) or (int(i.user_id) == int(chat_id) and int(i.chat_id) == int(self_id)):
+                db.session.delete(i)
+                db.session.commit()
+
+        return jsonify({'success': True})
+    return ''
+
 @app.route('/checkMsg', methods=['POST'])
 def checkMsg():
     if request.method == "POST":
